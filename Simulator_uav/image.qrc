@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>Agri.jpeg</file>
+    </qresource>
+</RCC>
