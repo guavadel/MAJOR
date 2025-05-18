@@ -3,17 +3,17 @@
 #include "devicecontroller.h"
 
 #include <QMetaEnum>
-#include <QMessageBox>    // For showing popups
-#include <QJsonObject>    // For telemetry JSON creation
-#include <QBuffer>        // To convert QPixmap to QByteArray
+#include <QMessageBox>
+#include <QJsonObject>
+#include <QBuffer>
 #include <QPixmap>
-#include <QImage>  // For loading the image
+#include <QImage>
 #include <QtNetwork/QTcpSocket>
 #include <QTimer>
 #include <QString>
 #include <cstdlib>
 #include <ctime>
-#include <QDebug> // Optional, for debugging
+#include <QDebug>
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QByteArray>
@@ -34,8 +34,6 @@ MainWindow::MainWindow(QWidget *parent)
     currentPosition.latitude = 28.6139;
     currentPosition.longitude = 77.2090;
     currentPosition.altitude = 300.0f;
-
-    // ⬇️ Add this inside the constructor:
     telemetryTimer = new QTimer(this);
     connect(telemetryTimer, &QTimer::timeout, this, &MainWindow::sendTelemetryData);
     telemetryTimer->start(2000);
@@ -119,7 +117,18 @@ void MainWindow::setDeviceContoller()
 void MainWindow::on_btnSend_clicked()
 {
     auto message = ui->lnMessage->text().trimmed();
-    _controller.send(message);
+    QByteArray packet;
+    QDataStream out(&packet, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_15);
+
+    // Different header for text, ex. 0xB1B2B3B4
+    quint32 headerValue = 0xB1B2B3B4;
+    out << headerValue;
+    out << qint32(message.size());
+    packet.append(message.toUtf8());
+
+    qDebug() << "Client sending text message, total packet size:" << packet.size();
+    _controller.send(packet);
 }
 
 void MainWindow::on_sendImageButton_clicked()

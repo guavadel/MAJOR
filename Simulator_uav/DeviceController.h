@@ -15,13 +15,12 @@ public:
     explicit DeviceController(QObject *parent = nullptr);
     void connectToDevice(QString ip, int port);
     void disconnect();
-    QAbstractSocket::SocketState state();
     bool isConnected();
     void send(QString message);
-    void send(const QVariant& data); // Already supports both QString and QByteArray
+    void send(const QVariant& data);
+    void send(const QByteArray& data);
     QTcpSocket* socket;
-    void send(const QByteArray& data); // New overload for binary data
-
+    QAbstractSocket::SocketState state();
 
 signals:
     void connected();
@@ -33,6 +32,7 @@ signals:
 private slots:
     void socket_stateChanged(QAbstractSocket::SocketState state);
     void socket_readyRead();
+
 private:
     QTcpSocket _socket;
     QString _ip;

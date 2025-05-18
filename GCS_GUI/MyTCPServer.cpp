@@ -33,6 +33,7 @@ void MyTCPServer::clientDisconnected()
 
 void MyTCPServer::clientDataReady()
 {
+
     auto socket = qobject_cast<QTcpSocket*>(sender());
     if (!socket) return;
 
@@ -44,7 +45,6 @@ void MyTCPServer::clientDataReady()
 
     qDebug() << "Received raw buffer, size:" << buffer.size() << ", first few bytes:" << buffer.left(16).toHex();
 
-    // Check for telemetry first (string-based)
     QString data(buffer);
     if (data.startsWith("Latitude:")) {
         qDebug() << "Received telemetry data:" << data.left(100);
@@ -68,56 +68,59 @@ void MyTCPServer::clientDataReady()
         }
         return;
     }
-
-    // Handle image data
     clientDataReadyImage(socket, buffer);
 }
 
 void MyTCPServer::clientDataReadyImage(QTcpSocket* socket, QByteArray& buffer)
 {
-    // Append to the socket-specific buffer
-    socketBuffers[socket].append(buffer);
-    QByteArray& imageBuffer = socketBuffers[socket];
+    QDataStream in(&buffer, QIODevice::ReadOnly);
+    in.setVersion(QDataStream::Qt_5_15);
 
-    qDebug() << "Processing image data, total buffer size:" << imageBuffer.size();
+    quint32 headerValue;
+    in >> headerValue;
 
-    // Ensure we have enough data for the header and size
-    while (imageBuffer.size() >= sizeof(quint32) + sizeof(qint32)) {
-        QDataStream in(&imageBuffer, QIODevice::ReadOnly);
-        in.setVersion(QDataStream::Qt_5_15); // Match client version
-        quint32 header;
-        in >> header;
-        if (header != IMAGE_HEADER) {
-            qDebug() << "Invalid image header detected:" << QString::number(header, 16) << ", clearing buffer";
-            qDebug() << "Expected header: a1b2c3d4, received first 4 bytes:" << imageBuffer.left(4).toHex();
-            imageBuffer.clear();
-            socketBuffers.remove(socket);
-            return;
-        }
+    if (headerValue == 0xA1B2C3D4) {
+        socketBuffers[socket].append(buffer);
+        QByteArray& imageBuffer = socketBuffers[socket];
 
-        qint32 imageDataSize;
-        in >> imageDataSize;
-        qDebug() << "Read image data size:" << imageDataSize;
+        qDebug() << "Processing image data, total buffer size:" << imageBuffer.size();
 
-        if (imageBuffer.size() - sizeof(quint32) - sizeof(qint32) < imageDataSize || imageDataSize <= 0) {
-            qDebug() << "Insufficient data for image, waiting, needed:" << (sizeof(quint32) + sizeof(qint32) + imageDataSize) << ", have:" << imageBuffer.size();
-            return;
-        }
 
-        // Remove header and size
-        imageBuffer.remove(0, sizeof(quint32) + sizeof(qint32));
+        while (imageBuffer.size() >= sizeof(quint32) + sizeof(qint32)) {
+            QDataStream in(&imageBuffer, QIODevice::ReadOnly);
+            in.setVersion(QDataStream::Qt_5_15); // Match client version
+            quint32 header;
+            in >> header;
+            if (header != IMAGE_HEADER) {
+                qDebug() << "Invalid image header detected:" << QString::number(header, 16) << ", clearing buffer";
+                qDebug() << "Expected header: a1b2c3d4, received first 4 bytes:" << imageBuffer.left(4).toHex();
+                imageBuffer.clear();
+                socketBuffers.remove(socket);
+                return;
+            }
 
-        QByteArray imageData = imageBuffer.left(imageDataSize);
-        imageBuffer.remove(0, imageDataSize);
+            qint32 imageDataSize;
+            in >> imageDataSize;
+            qDebug() << "Read image data size:" << imageDataSize;
 
-        QImage image;
-        if (image.loadFromData(imageData, "JPG")) {
-            qDebug() << "Successfully loaded QImage, dimensions:" << image.size();
-            emit imageReceived(image);
-            socketBuffers.remove(socket); // Clear buffer after success
-        } else {
-            qDebug() << "Failed to load QImage from data, size:" << imageData.size() << ", first few bytes:" << imageData.left(16).toHex();
-            socketBuffers.remove(socket); // Clear buffer on failure
+            if (imageBuffer.size() - sizeof(quint32) - sizeof(qint32) < imageDataSize || imageDataSize <= 0) {
+                qDebug() << "Insufficient data for image, waiting, needed:" << (sizeof(quint32) + sizeof(qint32) + imageDataSize) << ", have:" << imageBuffer.size();
+                return;
+            }
+            imageBuffer.remove(0, sizeof(quint32) + sizeof(qint32));
+
+            QByteArray imageData = imageBuffer.left(imageDataSize);
+            imageBuffer.remove(0, imageDataSize);
+
+            QImage image;
+            if (image.loadFromData(imageData, "JPG")) {
+                qDebug() << "Successfully loaded QImage, dimensions:" << image.size();
+                emit imageReceived(image);
+                socketBuffers.remove(socket);
+            } else {
+                qDebug() << "Failed to load QImage from data, size:" << imageData.size() << ", first few bytes:" << imageData.left(16).toHex();
+                socketBuffers.remove(socket);
+            }
         }
     }
 }

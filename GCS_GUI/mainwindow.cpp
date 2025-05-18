@@ -27,12 +27,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    ui->gridLayout->setColumnStretch(0, 1);  // First column stretches
-    ui->gridLayout->setRowStretch(0, 1);     // First row stretches
-    ui->gridLayout->setColumnStretch(1, 1);  // Second column stretches
+    ui->gridLayout->setColumnStretch(0, 1);
+    ui->gridLayout->setRowStretch(0, 1);
+    ui->gridLayout->setColumnStretch(1, 1);
     ui->gridLayout->setRowStretch(1, 1);
     _server = nullptr;
-    qDebug() << "MainWindow initialized"; // Debug initialization
+    qDebug() << "MainWindow initialized";
 
 }
 
@@ -44,7 +44,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_btnStartServer_clicked()
 {
-    qDebug() << "btnStartServer clicked"; // Debug button click
+    qDebug() << "btnStartServer clicked";
     if (_server == nullptr) {
         auto port = ui->spnServerPort->value();
         _server = new MyTCPServer(port, this);
@@ -65,19 +65,19 @@ void MainWindow::on_btnStartServer_clicked()
 void MainWindow::newClinetConnected()
 {
     ui->lstConsole->addItem("New Client connected");
-    qDebug() << "New client connected"; // Debug client connection
+    qDebug() << "New client connected";
 }
 
 void MainWindow::clientDisconnected()
 {
     ui->lstConsole->addItem("Client Disconnected");
-    qDebug() << "Client disconnected"; // Debug client disconnect
+    qDebug() << "Client disconnected";
 }
 
 void MainWindow::clientDataReceived(QString message)
 {
-    ui->lstConsole->addItem(message);
-    qDebug() << "Data received and logged to console:" << message; // Debug data reception
+    ui->lstConsole->addItem("Message: " + message);
+    qDebug() << "Data received and logged to console:" << message;
 }
 
 void MainWindow::on_btnSendToAll_clicked()
@@ -85,7 +85,7 @@ void MainWindow::on_btnSendToAll_clicked()
     auto message = ui->lnMessage->text().trimmed();
     if (_server && _server->isStarted()) {
         _server->sendToAll(message);
-        qDebug() << "Sent to all clients:" << message; // Debug send action
+        qDebug() << "Sent to all clients:" << message;
     } else {
         qDebug() << "Server not started, cannot send:" << message;
     }
@@ -125,7 +125,6 @@ void MainWindow::setupGoogleMap(float latitude, float longitude) {
         return;
     }
 
-    // Set the URL for Google Static Maps API
     QString url = QString("https://maps.googleapis.com/maps/api/staticmap?center=%1,%2&scale=4&zoom=15&size=680x440&markers=color:red%7Clabel:U%7C%1,%2&key=AIzaSyBt3dvbCoW-WNjngOLuFsb1aqP6K4Bci_4")
                       .arg(latitude)
                       .arg(longitude);
@@ -154,13 +153,11 @@ void MainWindow::setupGoogleMap(float latitude, float longitude) {
         reply->deleteLater();
     });
 
-    // Trigger the request
     manager->get(QNetworkRequest(QUrl(url)));
 }
+    // Resize mapLabel imageLabel while keeping the aspect ratio
 void MainWindow::resizeEvent(QResizeEvent* event) {
     QMainWindow::resizeEvent(event);
-
-    // Resize mapLabel while keeping the aspect ratio
     if (!ui->mapLabel->pixmap().isNull()) {
         QPixmap pixmap = ui->mapLabel->pixmap();
         ui->mapLabel->setPixmap(pixmap.scaled(
@@ -169,8 +166,6 @@ void MainWindow::resizeEvent(QResizeEvent* event) {
             Qt::SmoothTransformation
             ));
     }
-
-    // Resize imageLabel while keeping the aspect ratio
     if (!ui->imageLabel->pixmap().isNull()) {
         QPixmap pixmap = ui->imageLabel->pixmap();
         ui->imageLabel->setPixmap(pixmap.scaled(
