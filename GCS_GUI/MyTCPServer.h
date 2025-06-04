@@ -19,6 +19,9 @@ public:
     explicit MyTCPServer(int port, QObject *parent = nullptr);
     bool isStarted() const;
     void sendToAll(QString message);
+    void sendToClient(QTcpSocket *socket, const QString &message); // New method
+    QList<QTcpSocket*> getConnectedClients() const { return _socketsList; }
+    void disconnectClient(QTcpSocket* socket);
 
 signals:
     void newClientConnected();
@@ -26,6 +29,7 @@ signals:
     void dataReceived(QString data);
     void telemetryReceived(float latitude, float longitude, float altitude);
     void imageReceived(const QImage& image); // New signal for image reception
+    void clientListUpdated();
 
 private slots:
     void on_client_connecting();

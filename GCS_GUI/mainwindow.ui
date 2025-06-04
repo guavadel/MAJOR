@@ -6,41 +6,116 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1287</width>
-    <height>966</height>
+    <width>900</width>
+    <height>700</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>800</width>
+    <height>650</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Server</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">#lnIPAddress[state = &quot;0&quot;]{
-        background-color: rgb(234, 0, 0);
+   <string notr="true">
+#lnIPAddress[state = "0"] {
+    background-color: rgb(234, 0, 0);
 }
-#lblConnectionStatus[state = &quot;1&quot;]{
-        background-color: rgb(67, 135, 100);
+#lblConnectionStatus[state = "1"] {
+    background-color: rgb(67, 135, 100);
 }
-</string>
+#lblConnectionStatus[state = "0"] {
+    background-color: rgb(255, 0, 0);
+}
+QPushButton {
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 5px;
+}
+QPushButton:hover {
+    background-color: #66BB6A;
+}
+#imageGroupBox {
+    border: 2px solid #218380;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 10px;
+}
+#mapGroupBox {
+    border: 2px solid #8F2D56;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 10px;
+}
+#graphGroupBox {
+    border: 2px solid #6D8299;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 10px;
+}
+#clientListGroupBox {
+    border: 2px solid #FF9800;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 10px;
+}
+#commandHistoryGroupBox {
+    border: 2px solid #3F51B5;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 10px;
+}
+#groupBox {
+    border: 2px solid #2E8B57;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 10px;
+}
+#groupBox_2 {
+    border: 2px solid #A7C957;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 10px;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 3px;
+}
+#lstConsole, #lstConsole2, #commandHistoryList {
+    border: 1px solid #696969;
+    border-radius: 5px;
+    padding: 5px;
+}
+#label_3, #altLabel, #latLabel, #lonLabel {
+    border: 1px solid #2E8B57;
+    border-radius: 4px;
+    padding: 3px;
+}
+#telemetryWidget {
+    border: 2px solid #4682B4;
+    border-radius: 8px;
+    padding: 10px;
+}
+#customPlot {
+    border: 1px solid #696969;
+}
+#clientTable {
+    border: 1px solid #696969;
+    border-radius: 5px;
+}
+   </string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="layoutDirection">
-    <enum>Qt::LayoutDirection::LeftToRight</enum>
-   </property>
-   <property name="autoFillBackground">
-    <bool>false</bool>
-   </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <property name="spacing">
      <number>10</number>
@@ -74,6 +149,268 @@
       <property name="spacing">
        <number>10</number>
       </property>
+      <item row="1" column="1">
+       <widget class="QGroupBox" name="groupBox_2">
+        <property name="title">
+         <string>Message Information</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+        </property>
+        <layout class="QVBoxLayout" name="messageLayout">
+         <item>
+          <layout class="QFormLayout" name="formLayout_2">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Message:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="lnMessage"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QPushButton" name="btnSendToAll">
+             <property name="text">
+              <string>Send To All</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QPushButton" name="btnSendToSelected">
+             <property name="text">
+              <string>Send to Selected</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="0" column="2" rowspan="2">
+       <widget class="QGroupBox" name="clientListGroupBox">
+        <property name="title">
+         <string>Connected Clients</string>
+        </property>
+        <layout class="QVBoxLayout" name="clientListLayout">
+         <item>
+          <widget class="QTableWidget" name="clientTable">
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>300</height>
+            </size>
+           </property>
+           <property name="columnCount">
+            <number>3</number>
+           </property>
+           <attribute name="horizontalHeaderDefaultSectionSize">
+            <number>100</number>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <row/>
+           <column>
+            <property name="text">
+             <string>IP Address</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Port</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Status</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnDisconnectClient">
+           <property name="text">
+            <string>Disconnect Selected</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QGroupBox" name="imageGroupBox">
+        <property name="title">
+         <string>Image Display</string>
+        </property>
+        <layout class="QVBoxLayout" name="imageLayout">
+         <item>
+          <widget class="QLabel" name="imageLabel">
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>150</height>
+            </size>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>1</horstretch>
+             <verstretch>1</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="scaledContents">
+            <bool>true</bool>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QGroupBox" name="mapGroupBox">
+        <property name="title">
+         <string>Telemetry Map</string>
+        </property>
+        <layout class="QVBoxLayout" name="mapLayout">
+         <item>
+          <widget class="QLabel" name="mapLabel">
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>150</height>
+            </size>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>1</horstretch>
+             <verstretch>1</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="scaledContents">
+            <bool>true</bool>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
+           </property>
+           <property name="textInteractionFlags">
+            <set>Qt::LinksAccessibleByMouse</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="2" column="1" rowspan="2">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QListWidget" name="lstConsole">
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>150</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="consoleButtonsLayout">
+          <item>
+           <widget class="QPushButton" name="btnClear">
+            <property name="text">
+             <string>Clear</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="2">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QGroupBox" name="commandHistoryGroupBox">
+          <property name="title">
+           <string>Command History</string>
+          </property>
+          <layout class="QVBoxLayout" name="commandHistoryLayout">
+           <item>
+            <widget class="QListWidget" name="commandHistoryList">
+             <property name="minimumSize">
+              <size>
+               <width>200</width>
+               <height>100</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="0">
+       <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,0,0">
+        <property name="leftMargin">
+         <number>10</number>
+        </property>
+        <property name="topMargin">
+         <number>10</number>
+        </property>
+        <property name="rightMargin">
+         <number>10</number>
+        </property>
+        <property name="bottomMargin">
+         <number>10</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="font">
+           <font>
+            <family>Arial Rounded MT</family>
+           </font>
+          </property>
+          <property name="text">
+           <string>Telemetry Details</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="altLabel">
+          <property name="text">
+           <string>Altitude:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="latLabel">
+          <property name="text">
+           <string>Latitude:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lonLabel">
+          <property name="text">
+           <string>Longitude:</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
       <item row="0" column="1">
        <widget class="QGroupBox" name="groupBox">
         <property name="title">
@@ -123,202 +460,29 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QPushButton" name="btnStartServer">
-           <property name="text">
-            <string>Start Server</string>
-           </property>
-          </widget>
+          <layout class="QHBoxLayout" name="horizontalLayoutServerButtons">
+           <item>
+            <widget class="QPushButton" name="btnStartServer">
+             <property name="text">
+              <string>Start Server</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnSettings">
+             <property name="text">
+              <string>Settings</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,0,0">
-        <property name="leftMargin">
-         <number>20</number>
-        </property>
-        <property name="topMargin">
-         <number>20</number>
-        </property>
-        <property name="rightMargin">
-         <number>20</number>
-        </property>
-        <property name="bottomMargin">
-         <number>40</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="label_3">
-          <property name="font">
-           <font>
-            <family>Arial Rounded MT</family>
-           </font>
-          </property>
-          <property name="text">
-           <string>Telemetry Details</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="altLabel">
-          <property name="text">
-           <string>Altitude:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="latLabel">
-          <property name="text">
-           <string>Latitude:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lonLabel">
-          <property name="text">
-           <string>Longitude:</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="1" column="1">
-       <widget class="QGroupBox" name="groupBox_2">
-        <property name="title">
-         <string>Message Information</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignCenter</set>
-        </property>
-        <layout class="QFormLayout" name="formLayout_2">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>Message:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="lnMessage"/>
-         </item>
-         <item row="2" column="1">
-          <widget class="QPushButton" name="btnSendToAll">
-           <property name="text">
-            <string>Send To All</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="mapLabel">
-        <property name="minimumSize">
-         <size>
-          <width>350</width>
-          <height>300</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>mapLabel</string>
-        </property>
-        <property name="scaledContents">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2" rowspan="3">
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="QLineEdit" name="lstConsole2">
-          <property name="minimumSize">
-           <size>
-            <width>450</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>0</width>
-            <height>99999</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Orientation::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton">
-          <property name="text">
-           <string>PushButton</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="2" column="1">
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QListWidget" name="lstConsole">
-          <property name="minimumSize">
-           <size>
-            <width>200</width>
-            <height>200</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btnClear">
-          <property name="text">
-           <string>Clear</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="imageLabel">
-        <property name="minimumSize">
-         <size>
-          <width>350</width>
-          <height>300</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Image</string>
-        </property>
-        <property name="scaledContents">
-         <bool>false</bool>
-        </property>
        </widget>
       </item>
      </layout>
     </item>
    </layout>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1287</width>
-     <height>31</height>
-    </rect>
-   </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

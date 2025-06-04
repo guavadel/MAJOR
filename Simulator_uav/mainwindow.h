@@ -45,7 +45,8 @@ private slots:
 
     void on_sendTelemetryButton_clicked();
     void sendTelemetryData();
-
+    void sendNextImage();
+    void on_imagesLabel_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -58,6 +59,11 @@ private:
     QTimer* telemetryTimer;
     Telemetry currentPosition;
     QList<QTcpSocket*> _socketsList;
+
+    QTimer* imageSendTimer;
+    QStringList imageList;
+    int currentImageIndex;
+
 
     //methods
     void setDeviceContoller();

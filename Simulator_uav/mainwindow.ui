@@ -6,41 +6,116 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1216</width>
-    <height>883</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>700</width>
+    <height>600</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Client</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">#lnIPAddress[state = &quot;0&quot;]{
-
-        background-color: rgb(234, 0, 0);
+   <string notr="true">
+#lnIPAddress[state = "0"] {
+    background-color: rgb(234, 0, 0);
 }
-
-#lnIPAddress[state = &quot;1&quot;]{
-
-        background-color: rgb(67, 135, 100);
+#lnIPAddress[state = "1"] {
+    background-color: rgb(67, 135, 100);
 }
-</string>
+QPushButton {
+    background-color: #00AF54;
+    color: white;
+    border-radius: 10px;
+    padding: 5px;
+}
+QPushButton:hover {
+    background-color: #00CC66;
+}
+#groupBox {
+    border: 2px solid #2E8B57; /* Sea green for Connection Information */
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 10px;
+}
+#grpSendData {
+    border: 2px solid #4682B4; /* Steel blue for Send Data */
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 10px;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 3px;
+}
+QLineEdit {
+    border: 1px solid #696969;
+    border-radius: 5px;
+    padding: 3px;
+}
+QLineEdit:focus {
+    border: 1px solid #00AF54;
+}
+#lstConsole {
+    border: 1px solid #696969;
+    border-radius: 5px;
+    padding: 5px;
+}
+#altLabel, #lonLabel, #latLabel {
+    border: 1px solid #2E8B57;
+    border-radius: 4px;
+    padding: 3px;
+}
+#label_4 {
+    border: 1px solid #2E8B57;
+    border-radius: 4px;
+    padding: 3px;
+}
+#imageLabel {
+    border: 2px solid red;
+    border-radius: 5px;
+}
+   </string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">
-    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="spacing">
+     <number>10</number>
+    </property>
+    <property name="leftMargin">
+     <number>10</number>
+    </property>
+    <property name="topMargin">
+     <number>10</number>
+    </property>
+    <property name="rightMargin">
+     <number>10</number>
+    </property>
+    <property name="bottomMargin">
+     <number>10</number>
+    </property>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_4">
+      <property name="spacing">
+       <number>10</number>
+      </property>
       <property name="leftMargin">
        <number>10</number>
       </property>
@@ -54,74 +129,23 @@
        <number>10</number>
       </property>
       <item>
-       <widget class="QGroupBox" name="grpSendData">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
+       <widget class="QGroupBox" name="groupBox">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>200</height>
-         </size>
-        </property>
         <property name="title">
-         <string>Send Data</string>
-        </property>
-        <layout class="QFormLayout" name="formLayout_2">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Message:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="lnMessage">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>30</height>
-            </size>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="clearButtonEnabled">
-            <bool>true</bool>
-           </property>
-           <property name="state" stdset="0">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QPushButton" name="btnSend">
-           <property name="text">
-            <string>Send</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="groupBox">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>200</height>
-         </size>
-        </property>
-        <property name="title">
-         <string>Connection information</string>
+         <string>Connection Information</string>
         </property>
         <layout class="QFormLayout" name="formLayout">
+         <property name="horizontalSpacing">
+          <number>10</number>
+         </property>
+         <property name="verticalSpacing">
+          <number>10</number>
+         </property>
          <item row="0" column="0">
           <widget class="QLabel" name="label">
            <property name="text">
@@ -141,7 +165,7 @@
             <bool>true</bool>
            </property>
            <property name="state" stdset="0">
-            <string/>
+            <string>1</string>
            </property>
           </widget>
          </item>
@@ -155,10 +179,13 @@
          <item row="1" column="1">
           <widget class="QSpinBox" name="spnPort">
            <property name="minimum">
-            <number>12345</number>
+            <number>1024</number>
            </property>
            <property name="maximum">
             <number>65535</number>
+           </property>
+           <property name="value">
+            <number>12345</number>
            </property>
           </widget>
          </item>
@@ -173,9 +200,74 @@
        </widget>
       </item>
       <item>
+       <widget class="QGroupBox" name="grpSendData">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="title">
+         <string>Send Data</string>
+        </property>
+        <layout class="QFormLayout" name="formLayout_2">
+         <property name="horizontalSpacing">
+          <number>10</number>
+         </property>
+         <property name="verticalSpacing">
+          <number>10</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Message:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="lnMessage">
+           <property name="minimumSize">
+            <size>
+             <width>150</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="clearButtonEnabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QPushButton" name="btnSend">
+           <property name="text">
+            <string>Send</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QPushButton" name="sendImageButton">
+           <property name="text">
+            <string>Send Single Image</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QPushButton" name="imagesLabel">
+           <property name="text">
+            <string>Start Image Loop</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <property name="spacing">
-         <number>7</number>
+         <number>10</number>
         </property>
         <property name="leftMargin">
          <number>10</number>
@@ -194,10 +286,15 @@
           <property name="font">
            <font>
             <family>Arial Rounded MT</family>
+            <pointsize>12</pointsize>
+            <bold>true</bold>
            </font>
           </property>
           <property name="text">
            <string>Telemetry Data</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -211,7 +308,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Altitude</string>
+           <string>Altitude:</string>
           </property>
          </widget>
         </item>
@@ -225,7 +322,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Longitude</string>
+           <string>Longitude:</string>
           </property>
          </widget>
         </item>
@@ -239,112 +336,104 @@
            </font>
           </property>
           <property name="text">
-           <string>Latitude</string>
+           <string>Latitude:</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="sendTelemetryButton">
           <property name="text">
-           <string>Send/Stop Telemetry</string>
+           <string>Toggle Telemetry</string>
           </property>
          </widget>
         </item>
        </layout>
       </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
      </layout>
     </item>
     <item>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <property name="sizeConstraint">
-         <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="spacing">
+       <number>10</number>
+      </property>
+      <property name="leftMargin">
+       <number>10</number>
+      </property>
+      <property name="topMargin">
+       <number>10</number>
+      </property>
+      <property name="rightMargin">
+       <number>10</number>
+      </property>
+      <property name="bottomMargin">
+       <number>10</number>
+      </property>
+      <item>
+       <widget class="QListWidget" name="lstConsole">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <property name="leftMargin">
-         <number>10</number>
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>200</height>
+         </size>
         </property>
-        <property name="topMargin">
-         <number>10</number>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnClear">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <property name="rightMargin">
-         <number>10</number>
+        <property name="text">
+         <string>Clear Console</string>
         </property>
-        <property name="bottomMargin">
-         <number>10</number>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="imageLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <item>
-         <widget class="QListWidget" name="lstConsole">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>450</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>0</width>
-            <height>99999</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btnClear">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Clear</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <property name="sizeConstraint">
-           <enum>QLayout::SizeConstraint::SetFixedSize</enum>
-          </property>
-          <property name="leftMargin">
-           <number>10</number>
-          </property>
-          <property name="topMargin">
-           <number>10</number>
-          </property>
-          <property name="rightMargin">
-           <number>10</number>
-          </property>
-          <property name="bottomMargin">
-           <number>10</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="imageLabel">
-            <property name="text">
-             <string>TextLabel</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="sendImageButton">
-            <property name="text">
-             <string>Send Image</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>150</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -355,8 +444,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1216</width>
-     <height>29</height>
+     <width>800</width>
+     <height>31</height>
     </rect>
    </property>
   </widget>
@@ -368,7 +457,7 @@
    <sender>btnClear</sender>
    <signal>clicked()</signal>
    <receiver>lstConsole</receiver>
-   <slot>clear()</slot>
+   <slot>clear</slot>
    <hints>
     <hint type="sourcelabel">
      <x>401</x>

@@ -1,4 +1,4 @@
-QT       += core gui network positioning
+QT       += core gui network location positioning
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -11,14 +11,17 @@ CONFIG += c++17
 SOURCES += \
     MyTCPServer.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    settingsdialog.cpp
 
 HEADERS += \
     MyTCPServer.h \
-    mainwindow.h
+    mainwindow.h \
+    settingsdialog.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    settingsdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

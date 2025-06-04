@@ -1,9 +1,8 @@
 #include "MyTCPServer.h"
-
-const quint32 MyTCPServer::IMAGE_HEADER;
+#include <QDataStream>
 
 MyTCPServer::MyTCPServer(int port, QObject *parent)
-    : QObject(parent)
+    : QObject(parent), _isStarted(false)
 {
     _server = new QTcpServer(this);
     connect(_server, &QTcpServer::newConnection, this, &MyTCPServer::on_client_connecting);
@@ -11,7 +10,7 @@ MyTCPServer::MyTCPServer(int port, QObject *parent)
     if (!_isStarted) {
         qDebug() << "Server could not start";
     } else {
-        qDebug() << "Server started...";
+        qDebug() << "Server started on port" << port;
     }
 }
 
@@ -24,107 +23,170 @@ void MyTCPServer::on_client_connecting()
     _socketsList.append(socket);
     socket->write("Welcome to this Server");
     emit newClientConnected();
+    emit clientListUpdated();
 }
 
 void MyTCPServer::clientDisconnected()
 {
+    auto socket = qobject_cast<QTcpSocket*>(sender());
+    if (socket) {
+        _socketsList.removeAll(socket);
+        socketBuffers.remove(socket);
+        socket->deleteLater();
+        qDebug() << "Client disconnected:" << socket->peerAddress().toString();
+    }
     emit clientDisconnect();
+    emit clientListUpdated();
 }
 
 void MyTCPServer::clientDataReady()
 {
-
     auto socket = qobject_cast<QTcpSocket*>(sender());
     if (!socket) return;
 
-    QByteArray buffer = socket->readAll();
-    if (buffer.isEmpty()) {
-        qDebug() << "Received empty buffer in clientDataReady, skipping";
-        return;
-    }
+    QByteArray& accumulatedBuffer = socketBuffers[socket];
+    accumulatedBuffer.append(socket->readAll());
 
-    qDebug() << "Received raw buffer, size:" << buffer.size() << ", first few bytes:" << buffer.left(16).toHex();
+    while (true) {
+        if (accumulatedBuffer.size() < static_cast<int>(sizeof(quint32) + sizeof(qint32))) {
+            return;
+        }
 
-    QString data(buffer);
-    if (data.startsWith("Latitude:")) {
-        qDebug() << "Received telemetry data:" << data.left(100);
-        emit dataReceived(data);
-        if (data.contains("Longitude:") && data.contains("Altitude:")) {
-            QStringList parts = data.split(", ");
-            if (parts.size() == 3) {
-                bool ok;
-                float latitude = parts[0].split(": ")[1].toFloat(&ok);
-                if (ok) {
-                    float longitude = parts[1].split(": ")[1].toFloat(&ok);
+        QDataStream stream(accumulatedBuffer);
+        stream.setVersion(QDataStream::Qt_5_15);
+        stream.setByteOrder(QDataStream::BigEndian);
+
+        quint32 header;
+        qint32 size;
+        stream >> header >> size;
+
+        if (header == IMAGE_HEADER) { // Image data
+            int totalSize = sizeof(quint32) + sizeof(qint32) + size;
+            if (accumulatedBuffer.size() < totalSize)
+                return;
+
+            accumulatedBuffer.remove(0, sizeof(quint32) + sizeof(qint32));
+            QByteArray imageData = accumulatedBuffer.left(size);
+            accumulatedBuffer.remove(0, size);
+
+            QImage image;
+            if (image.loadFromData(imageData, "JPG")) {
+                qDebug() << "✅ Image received. Size:" << image.size();
+                emit imageReceived(image);
+            } else {
+                qDebug() << "❌ Failed to load image.";
+            }
+        }
+        else if (header == 0xB1B2B3B4) { // Message or telemetry data
+            int totalSize = sizeof(quint32) + sizeof(qint32) + size;
+            if (accumulatedBuffer.size() < totalSize)
+                return;
+
+            accumulatedBuffer.remove(0, sizeof(quint32) + sizeof(qint32));
+            QByteArray messageData = accumulatedBuffer.left(size);
+            accumulatedBuffer.remove(0, size);
+
+            QString message(messageData);
+
+            bool isTelemetry = message.startsWith("Latitude:") &&
+                               message.contains("Longitude:") &&
+                               message.contains("Altitude:");
+
+            if (!isTelemetry) {
+                qDebug() << "📨 Message received:" << message;
+                emit dataReceived(message);
+            }
+
+            if (isTelemetry) {
+                QStringList parts = message.split(", ");
+                if (parts.size() == 3) {
+                    bool ok;
+                    float lat = parts[0].split(": ")[1].toFloat(&ok);
                     if (ok) {
-                        float altitude = parts[2].split(": ")[1].toFloat(&ok);
+                        float lon = parts[1].split(": ")[1].toFloat(&ok);
                         if (ok) {
-                            qDebug() << "Parsed telemetry: lat=" << latitude << ", lon=" << longitude << ", alt=" << altitude;
-                            emit telemetryReceived(latitude, longitude, altitude);
+                            float alt = parts[2].split(": ")[1].toFloat(&ok);
+                            if (ok) {
+                                emit telemetryReceived(lat, lon, alt);
+                            }
                         }
                     }
                 }
             }
         }
-        return;
-    }
-    clientDataReadyImage(socket, buffer);
-}
-
-void MyTCPServer::clientDataReadyImage(QTcpSocket* socket, QByteArray& buffer)
-{
-    QDataStream in(&buffer, QIODevice::ReadOnly);
-    in.setVersion(QDataStream::Qt_5_15);
-
-    quint32 headerValue;
-    in >> headerValue;
-
-    if (headerValue == 0xA1B2C3D4) {
-        socketBuffers[socket].append(buffer);
-        QByteArray& imageBuffer = socketBuffers[socket];
-
-        qDebug() << "Processing image data, total buffer size:" << imageBuffer.size();
-
-
-        while (imageBuffer.size() >= sizeof(quint32) + sizeof(qint32)) {
-            QDataStream in(&imageBuffer, QIODevice::ReadOnly);
-            in.setVersion(QDataStream::Qt_5_15); // Match client version
-            quint32 header;
-            in >> header;
-            if (header != IMAGE_HEADER) {
-                qDebug() << "Invalid image header detected:" << QString::number(header, 16) << ", clearing buffer";
-                qDebug() << "Expected header: a1b2c3d4, received first 4 bytes:" << imageBuffer.left(4).toHex();
-                imageBuffer.clear();
-                socketBuffers.remove(socket);
-                return;
-            }
-
-            qint32 imageDataSize;
-            in >> imageDataSize;
-            qDebug() << "Read image data size:" << imageDataSize;
-
-            if (imageBuffer.size() - sizeof(quint32) - sizeof(qint32) < imageDataSize || imageDataSize <= 0) {
-                qDebug() << "Insufficient data for image, waiting, needed:" << (sizeof(quint32) + sizeof(qint32) + imageDataSize) << ", have:" << imageBuffer.size();
-                return;
-            }
-            imageBuffer.remove(0, sizeof(quint32) + sizeof(qint32));
-
-            QByteArray imageData = imageBuffer.left(imageDataSize);
-            imageBuffer.remove(0, imageDataSize);
-
-            QImage image;
-            if (image.loadFromData(imageData, "JPG")) {
-                qDebug() << "Successfully loaded QImage, dimensions:" << image.size();
-                emit imageReceived(image);
-                socketBuffers.remove(socket);
-            } else {
-                qDebug() << "Failed to load QImage from data, size:" << imageData.size() << ", first few bytes:" << imageData.left(16).toHex();
-                socketBuffers.remove(socket);
-            }
+        else {
+            qDebug() << "❗ Unknown packet header:" << QString::number(header, 16);
+            accumulatedBuffer.clear();
+            return;
         }
     }
 }
 
+void MyTCPServer::clientDataReadyImage(QTcpSocket* socket, QByteArray& buffer)
+{
+    // Append incoming buffer to the accumulated buffer for this socket
+    QByteArray& imageBuffer = socketBuffers[socket];
+    imageBuffer.append(buffer);
+    qDebug() << "Appended new data, total buffer size:" << imageBuffer.size();
+
+    while (true) {
+        // Ensure we have at least 8 bytes for the header (4) + image size (4)
+        if (imageBuffer.size() < static_cast<int>(sizeof(quint32) + sizeof(qint32))) {
+            qDebug() << "Not enough data for header and size, waiting for more...";
+            return;
+        }
+
+        // Use a stream to read header and image size without removing from buffer
+        QDataStream peekStream(imageBuffer);
+        peekStream.setVersion(QDataStream::Qt_5_15);
+
+
+        quint32 header;
+        qint32 imageSize;
+        peekStream >> header >> imageSize;
+
+        // Validate header
+        if (header != 0xA1B2C3D4) {
+            qDebug() << "Invalid header:" << QString::number(header, 16);
+            qDebug() << "Clearing buffer, first few bytes:" << imageBuffer.left(8).toHex();
+            socketBuffers.remove(socket);
+            return;
+        }
+
+        // Validate size
+        if (imageSize <= 0) {
+            qDebug() << "Invalid image size:" << imageSize << ", clearing buffer.";
+            socketBuffers.remove(socket);
+            return;
+        }
+
+        // Check if full image data has been received
+        int totalRequired = sizeof(quint32) + sizeof(qint32) + imageSize;
+        if (imageBuffer.size() < totalRequired) {
+            qDebug() << "Incomplete image, waiting. Needed:" << totalRequired << ", have:" << imageBuffer.size();
+            return;
+        }
+
+        // Remove header and size
+        imageBuffer.remove(0, sizeof(quint32) + sizeof(qint32));
+
+        // Extract the image data
+        QByteArray imageData = imageBuffer.left(imageSize);
+        imageBuffer.remove(0, imageSize);
+
+        // Try to load image
+        QImage image;
+        if (image.loadFromData(imageData, "JPG")) {
+            qDebug() << "✅ Image received successfully. Size:" << image.size();
+            emit imageReceived(image);
+        } else {
+            qDebug() << "❌ Failed to load image. Size:" << imageData.size()
+                << ", First bytes:" << imageData.left(16).toHex();
+        }
+
+        // Loop again to check if more images are in buffer
+    }
+}
 
 bool MyTCPServer::isStarted() const
 {
@@ -133,7 +195,38 @@ bool MyTCPServer::isStarted() const
 
 void MyTCPServer::sendToAll(QString message)
 {
-    foreach (auto socket, _socketsList) {
-        socket->write(message.toUtf8());
+    QByteArray data = message.toUtf8();
+    for (auto socket : _socketsList) {
+        if (socket->state() == QAbstractSocket::ConnectedState) {
+            socket->write(data);
+            socket->flush();
+        }
+    }
+    qDebug() << "Sent to all clients:" << message;
+}
+
+
+void MyTCPServer::sendToClient(QTcpSocket *socket, const QString &message)
+{
+    if (socket && socket->state() == QAbstractSocket::ConnectedState) {
+        QByteArray data = message.toUtf8();
+        socket->write(data);
+        socket->flush();
+        qDebug() << "Sent to client" << socket->peerAddress().toString() << ":" << message;
+    } else {
+        qDebug() << "Client not connected or invalid socket";
+    }
+}
+
+void MyTCPServer::disconnectClient(QTcpSocket* socket)
+{
+    if (_socketsList.contains(socket)) {
+        _socketsList.removeAll(socket);
+        socketBuffers.remove(socket);
+        socket->disconnectFromHost();
+        socket->deleteLater();
+        qDebug() << "Client disconnected by server:" << socket->peerAddress().toString();
+        emit clientDisconnect();
+        emit clientListUpdated();
     }
 }

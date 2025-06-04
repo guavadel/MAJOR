@@ -20,7 +20,10 @@
 #include <QThread>
 #include <QCoreApplication>
 #include <QDataStream>
+#include <QDir>
+#include <QFile>
 
+const QString IMAGE_DIR = ":/images";  // <- Change this to your folder path
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -37,6 +40,9 @@ MainWindow::MainWindow(QWidget *parent)
     telemetryTimer = new QTimer(this);
     connect(telemetryTimer, &QTimer::timeout, this, &MainWindow::sendTelemetryData);
     telemetryTimer->start(2000);
+    imageSendTimer = new QTimer(this);
+    connect(imageSendTimer, &QTimer::timeout, this, &MainWindow::sendNextImage);
+
 
 }
 
@@ -121,11 +127,11 @@ void MainWindow::on_btnSend_clicked()
     QDataStream out(&packet, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_15);
 
-    // Different header for text, ex. 0xB1B2B3B4
     quint32 headerValue = 0xB1B2B3B4;
     out << headerValue;
     out << qint32(message.size());
     packet.append(message.toUtf8());
+    out.setByteOrder(QDataStream::BigEndian);   // Explicitly set byte order
 
     qDebug() << "Client sending text message, total packet size:" << packet.size();
     _controller.send(packet);
@@ -186,7 +192,19 @@ void MainWindow::sendTelemetryData()
     ui->lonLabel->setText(QString("Longitude: %1").arg(currentPosition.longitude, 0, 'f', 6));
     ui->altLabel->setText(QString("Altitude: %1").arg(currentPosition.altitude, 0, 'f', 2));
 
-    _controller.send(telemetry);
+    // Prepare data with header and size
+    QByteArray payload = telemetry.toUtf8();
+    QByteArray packet;
+    QDataStream stream(&packet, QIODevice::WriteOnly);
+    stream.setByteOrder(QDataStream::BigEndian);
+
+    quint32 header = 0xB1B2B3B4;
+    qint32 size = payload.size();
+
+    stream << header << size;
+    packet.append(payload);
+
+    _controller.send(packet);
 }
 
 
@@ -195,10 +213,80 @@ void MainWindow::on_sendTelemetryButton_clicked()
     if (telemetryTimer->isActive()) {
         telemetryTimer->stop();
         ui->lstConsole->addItem("Telemetry stopped.");
+        ui->sendTelemetryButton->setText("Start sending Telemetry data");
+        ui->sendTelemetryButton->setStyleSheet("background-color: green; color: white; padding: 5px;");
     } else {
         telemetryTimer->start(2000);
         ui->lstConsole->addItem("Telemetry started.");
+        ui->sendTelemetryButton->setText("Stop sending Telemetry data");
+        ui->sendTelemetryButton->setStyleSheet("background-color: red; color: white; padding: 5px;");
     }
+}
+
+void MainWindow::sendNextImage()
+{
+    if (imageList.isEmpty() || !_controller.isConnected()) {
+        ui->lstConsole->addItem("No images or not connected.");
+        return;
+    }
+    currentImageIndex = currentImageIndex % imageList.size();
+    QString imagePath = imageList[currentImageIndex++];
+    QImage image(imagePath);
+    if (image.isNull()) {
+        ui->lstConsole->addItem("Failed to load: " + imagePath);
+        return;
+    }
+
+    QByteArray imageData;
+    QBuffer buffer(&imageData);
+    buffer.open(QIODevice::WriteOnly);
+    image.save(&buffer, "JPEG");
+    buffer.close();
+
+    QByteArray packet;
+    QDataStream out(&packet, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_15);
+    quint32 headerValue = 0xA1B2C3D4;
+    out << headerValue;
+    out << qint32(imageData.size());
+    packet.append(imageData);
+
+    _controller.send(packet);
+    ui->lstConsole->addItem(QString("Sent image %1").arg(imagePath));
+}
+
+
+void MainWindow::on_imagesLabel_clicked()
+{
+    if (imageSendTimer->isActive()) {
+        imageSendTimer->stop();
+        ui->imagesLabel->setText("Start Image Sending");
+        ui->imagesLabel->setStyleSheet("background-color: green; color: white; padding: 5px;");
+        ui->lstConsole->addItem("Image sending stopped.");
+        return;
+    }
+
+    QDir dir(IMAGE_DIR);
+    QStringList filters = {"*.jpg", "*.jpeg", "*.png"};
+    QFileInfoList files = dir.entryInfoList(filters, QDir::Files | QDir::Readable, QDir::Name);
+
+    imageList.clear();
+    for (const QFileInfo& fileInfo : files) {
+        imageList.append(fileInfo.absoluteFilePath());
+    }
+
+    if (imageList.isEmpty()) {
+        ui->lstConsole->addItem("No images found in directory: " + IMAGE_DIR);
+        return;
+    }
+
+    currentImageIndex = 0;
+    imageSendTimer->start(500);  // Send an image every 500ms
+
+    ui->imagesLabel->setText("Stop Image Sending");
+    ui->imagesLabel->setStyleSheet("background-color: red; color: white; padding: 5px;");
+    ui->lstConsole->addItem(QString("Started sending %1 images from folder: %2")
+                                .arg(imageList.size()).arg(IMAGE_DIR));
 }
 
 
